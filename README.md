@@ -10,6 +10,8 @@ Escribes un guion en piezas que encajan entre sí, lo grabas en una sola sesión
 
 ![El sistema Lego](guia/assets/sistema-lego.png)
 
+**Ya lo corrimos en Imperio:** desde el 28 de agosto de 2026, 74 anuncios armados por piezas trajeron 113 compras a $73 cada una, mientras las campañas de compra de toda la cuenta promediaron $83.
+
 ## Qué necesitas
 
 - Un computador (Mac o Windows).

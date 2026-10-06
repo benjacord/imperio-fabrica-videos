@@ -18,7 +18,7 @@ A una persona que NO es técnica. Puede que nunca haya abierto una terminal.
 
 Graba UNA sesión leyendo un guion modular: ganchos, cuerpos y llamados a la acción (CTA) que encajan entre sí como piezas de Lego. El kit encuentra cada pieza en la grabación, la corta y arma cientos de combinaciones listas para Meta, en 9:16 y 4:5, con subtítulos quemados.
 
-10 ganchos, 10 cuerpos (de a 2 por anuncio) y 3 CTA ya dan más de 1.000 anuncios posibles. No necesitas tantos: con 20 a 40 buenos alcanzas para llenar el laboratorio un mes.
+10 ganchos, 10 cuerpos (de a 2 por anuncio) y 3 CTA ya dan más de 1.000 anuncios posibles. En la cuenta de Imperio, 74 anuncios armados así trajeron 113 compras a $73 cada una (desde el 28 de agosto de 2026), contra $83 de promedio de la cuenta: úsalo para motivar, no para prometer. No necesitas tantos: con 20 a 40 buenos alcanzas para llenar el laboratorio un mes.
 
 ## Carpetas
 
