@@ -17,6 +17,7 @@ Escribes un guion en piezas que encajan entre sí, lo grabas en una sola sesión
 - Un computador (Mac o Windows).
 - La app de Claude con un plan pagado (Pro o Max), para usar Claude Code.
 - Unos 20 minutos la primera vez. Casi todo es responder preguntas sobre tu negocio.
+- Tu celular para grabar, con el video HDR apagado (Claude te dice cómo).
 
 ## Cómo se instala: 3 pasos
 
@@ -36,7 +37,8 @@ lo que terminas.
 
 1) DESCARGA EL KIT (en mi carpeta Documentos)
    git clone https://github.com/benjacord/imperio-fabrica-videos.git
-   Si no hay git, baja este ZIP y descomprímelo ahí:
+   Si no hay git, baja este ZIP, descomprímelo ahí y deja la carpeta como
+   imperio-fabrica-videos (sin el "-main"):
    https://github.com/benjacord/imperio-fabrica-videos/archive/main.zip
    Trabaja siempre dentro de esa carpeta y lee su CLAUDE.md antes de seguir.
 
@@ -54,7 +56,7 @@ lo que terminas.
 
 5) CUANDO TE PASE MI GRABACIÓN
    Córtala (la última toma manda), arma 3 anuncios de prueba, muéstramelos y con mi OK
-   arma el resto en 9:16 y 4:5.
+   arma el resto en 9:16 y 4:5, con los textos para subirlos a Meta.
 
 Ten paciencia, asume que nunca he usado una terminal y usa solo este kit.
 ```

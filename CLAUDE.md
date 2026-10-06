@@ -33,7 +33,9 @@ Graba UNA sesión leyendo un guion modular: ganchos, cuerpos y llamados a la acc
 
 ## Cómo correr los scripts
 
-La primera vez: `python3 scripts/doctor.py --arreglar --modelo small` (en Windows: `py scripts\doctor.py --arreglar --modelo small`). Crea `.venv` dentro del kit, instala lo necesario (faster-whisper, ffmpeg de respaldo, Pillow) y descarga el modelo de transcripción (unos 500 MB, una sola vez). Repite hasta que diga LISTO.
+La primera vez: `python3 scripts/doctor.py --arreglar --modelo small` (en Windows: `py scripts\doctor.py --arreglar --modelo small`). Crea `.venv` dentro del kit, instala lo necesario (faster-whisper, ffmpeg, Pillow) y descarga el modelo de transcripción a `.modelos/` (unos 500 MB, una sola vez). Todo queda dentro de la carpeta del kit: para desinstalar basta con borrarla. Repite hasta que diga LISTO.
+
+**Dónde vive el kit.** En la carpeta Documentos de la persona: en Mac es `~/Documents` (Finder la muestra como "Documentos"); en Windows, `%USERPROFILE%\Documents` o, si tiene OneDrive, `OneDrive\Documentos`. Si bajaste el ZIP, la carpeta queda como `imperio-fabrica-videos-main`: cámbiale el nombre a `imperio-fabrica-videos` antes de crear el `.venv`. Si Documentos se sincroniza con iCloud u OneDrive, avísale en una frase que sus videos van a ocupar espacio en la nube y ofrécele dejar el kit en su carpeta de usuario.
 
 Después, siempre con el Python del kit:
 - Mac y Linux: `.venv/bin/python scripts/<script>.py`
@@ -72,7 +74,7 @@ Para partir: **10 ganchos, 10 cuerpos y 3 CTA**. Muéstraselo en una tabla legib
 **Reglas del guion (salen de la cuenta real de Imperio, que invirtió más de $200.000 en Meta):**
 
 - **Cada pieza se tiene que poder pegar con cualquier otra.** Un cuerpo no puede decir "como te dije", "eso que viste" ni depender de un gancho en particular. Si lo lees después de cualquier gancho, tiene que sonar natural.
-- **Gancho:** 1 o 2 frases, menos de 4 segundos (unas 15 palabras como máximo). Abre una pregunta en la cabeza del que mira. Las familias que mejor le vendieron a Imperio: precio y urgencia con dato, testimonio con cifra, demostración, historia personal y autoridad (un premio, un ranking). Cada gancho lleva un "angulo" corto, que se usa para nombrar el archivo.
+- **Gancho:** 1 o 2 frases, menos de 4 segundos (unas 10 palabras como máximo). Ojo con las cifras: "$16.990" se lee en 5 palabras. Abre una pregunta en la cabeza del que mira. Las familias que mejor le vendieron a Imperio: precio y urgencia con dato, testimonio con cifra, demostración, historia personal y autoridad (un premio, un ranking). Cada gancho lleva un "angulo" corto, que se usa para nombrar el archivo.
 - **Evita la confrontación y el miedo** ("te van a pasar por encima", "los flojos van a ganar"): en la cuenta de Imperio fue el 8% del gasto a más del triple del costo por compra normal.
 - **Cuerpo:** una sola idea, 5 a 9 segundos. Cada uno lleva un "rol": `problema`, `mecanismo` (cómo funciona), `prueba` (resultado real) u `oferta` (qué incluye y cuánto cuesta). El armador respeta ese orden.
 - **CTA:** una sola acción, menos de 4 segundos ("Toca el botón de abajo y agenda tu hora").
@@ -84,11 +86,13 @@ Para partir: **10 ganchos, 10 cuerpos y 3 CTA**. Muéstraselo en una tabla legib
 ### 3. Grabar
 
 Explícale cómo grabar (está también al inicio de `teleprompter.txt`):
+- **Antes de partir, que apague el video HDR** (iPhone: Ajustes > Cámara > Grabar video > Video HDR). Si se le olvida, `cortar.py` lo convierte solo, pero sale mejor sin HDR.
 - Una sola sesión, misma ropa, misma luz, mismo encuadre. Celular en vertical a la altura de los ojos.
 - Lee cada pieza de corrido y quédate 2 segundos en silencio antes de la siguiente.
 - Si se equivoca: para, 2 segundos de silencio y repite la pieza completa. **La última toma manda**, no hay que borrar nada.
 - No decir los códigos (G01, C03) en voz alta.
-- Al terminar, que te pase el video (o los clips) y tú los dejas en `10_GRABACIONES/`.
+- Para pasar el video al computador: AirDrop, el cable o Google Drive. **Por WhatsApp no**: lo comprime.
+- Al terminar, que arrastre el video (o los clips) a este chat o te diga dónde quedó (por ejemplo, Descargas), y tú lo mueves a `10_GRABACIONES/`.
 
 ### 4. Cortar
 
@@ -96,13 +100,16 @@ Explícale cómo grabar (está también al inicio de `teleprompter.txt`):
 2. `scripts/cortar.py` encuentra cada pieza, usa la última toma y deja todo en `20_PIEZAS/`.
 3. Lee `20_PIEZAS/REPORTE.md` y cuéntale en simple qué salió y qué no.
    - Si faltan piezas: o no se grabaron, o se dijeron muy distinto. Opciones: grabar solo esas, ajustar el texto del guion a lo que dijo y volver a cortar, o bajar `--umbral` a 0.65.
-   - Las marcadas con ⚠️ se parecen menos al guion: suele ser una cifra dicha distinto. Escucha el texto y decide.
+   - "Escucha estas antes de armar" (las marcadas con ⚠️): se parecen menos al guion o se oye algo que no está en el texto (un tropiezo, una palabra de más). Dile cuáles son y que las escuche; si no le gustan, que grabe solo esas.
+   - "Volviste a empezar sin pausa": el corte ya usó el último intento. Solo avísale.
+   - "Ganchos de más de 4 segundos": funcionan, pero propónle acortarlos para la próxima.
+   - "Tu grabación venía en HDR": ya se convirtió. Recuérdale apagar Video HDR la próxima vez.
 
 ### 5. Armar
 
-1. `scripts/combinar.py --cantidad 30` decide las combinaciones (`mi-negocio/combos.json`).
+1. `scripts/combinar.py --cantidad 30` decide las combinaciones (`mi-negocio/combos.json`): anuncios de 20 a 30 segundos y ninguno solo con el problema (siempre lleva un cuerpo de mecanismo u oferta). Si no alcanza la cantidad, usa `--cuerpos 2-3`.
 2. `scripts/armar.py --solo 3` arma 3 de prueba. Muéstraselos (abre la carpeta `30_ANUNCIOS`) y pregúntale qué ajustar: subtítulos en mayúsculas (`--mayusculas`), solo la frase sin pintar palabra por palabra (`--subtitulos frase`), sin subtítulos (`--subtitulos no`), otro color (`--color "#00E5FF"`), recorte más arriba o más abajo (`--recorte-y 0.3`).
-3. Con su OK, `scripts/armar.py` arma el resto. Por defecto saca 9:16 (Reels y Stories) y 4:5 (feed).
+3. Con su OK, `scripts/armar.py` arma el resto. Por defecto saca 9:16 (Reels y Stories) y 4:5 (feed). No repite los que ya están hechos con el mismo estilo; si cambiaste el estilo (por ejemplo `--mayusculas`), usa el mismo en este paso y los de prueba se rehacen solos. `--rehacer` fuerza todo de nuevo.
 
 Los nombres siguen la regla `AAAAMMDD_ANGULO_LEGO_PIEZAS_FORMATO.mp4`. Explícale por qué: si un anuncio se llama `IMG_1873.MOV`, en un mes nadie sabe qué era. Con el nombre se lee el ángulo y las piezas sin abrirlo.
 
@@ -125,6 +132,8 @@ Escribe `mi-negocio/textos-meta.md`: por cada ángulo, un texto principal (2 a 5
 | Se come el inicio o el final de una palabra | `cortar.py --margen-inicio 0.2 --margen-fin 0.45` |
 | Subtítulo mal escrito | Corrige el texto de esa pieza en `guion.json` y vuelve a correr `cortar.py` y `armar.py` |
 | Grabó en horizontal | Funciona, pero el 9:16 sale recortado al centro. Recomiéndale grabar en vertical la próxima vez |
+| Los colores se ven lavados o grises | Grabó con Video HDR y no se pudo convertir: corre `doctor.py --arreglar` y vuelve a cortar. Para la próxima, Video HDR apagado |
+| El video llegó por WhatsApp | Funciona, pero se ve peor: pídele el original por AirDrop, cable o Google Drive |
 
 ## Lo que nunca haces
 

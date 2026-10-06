@@ -17,7 +17,7 @@ Ojo: esto **no es inteligencia artificial generando videos**. Son tus tomas real
 3. Copia la caja que está en el `README.md` (o en la página 5 del PDF) y pégala.
 4. Claude descarga el kit en tu carpeta Documentos, instala lo que falte (solo dentro de la carpeta del kit) y te avisa cuando diga **LISTO**.
 
-La primera vez descarga un modelo de transcripción de unos 500 MB. Después todo funciona sin internet.
+La primera vez descarga un modelo de transcripción de unos 500 MB, que también queda dentro de la carpeta del kit. Después todo funciona sin internet.
 
 ## 3. Tu guion
 
@@ -33,19 +33,20 @@ Si quieres ver cómo se ve uno de verdad, mira `plantillas/guion.ejemplo.json`: 
 
 ## 4. Cómo grabar
 
+- Antes de partir, apaga el video HDR. En iPhone: Ajustes > Cámara > Grabar video > Video HDR. Si se te olvida, el kit lo convierte solo, pero sale mejor sin HDR.
 - Todo en una sola sesión: misma ropa, misma luz, mismo encuadre.
 - Celular en vertical, a la altura de los ojos.
 - Lee cada pieza de corrido y quédate 2 segundos en silencio antes de la siguiente.
 - Si te equivocas, para, espera 2 segundos y repite la pieza completa. **La última toma es la que se usa**: no tienes que borrar nada.
 - No digas los códigos (G01, C03) en voz alta.
 
-Puedes grabar todo en un solo video largo o en varios clips. Cuando termines, pásale los archivos a Claude (o arrástralos a la carpeta `10_GRABACIONES`).
+Puedes grabar todo en un solo video largo o en varios clips. Pásalos al computador por AirDrop, cable o Google Drive (por WhatsApp no: los comprime) y después arrástralos al chat con Claude, o a la carpeta `10_GRABACIONES`.
 
 ## 5. Cortar y armar
 
 Dile "corta mi grabación". Claude transcribe, encuentra cada pieza y te cuenta qué encontró y qué faltó (está en `20_PIEZAS/REPORTE.md`). Si faltó algo, puedes grabar solo esa pieza.
 
-Después dile "arma 3 de prueba". Míralos y pide cambios: subtítulos más grandes, en mayúsculas, de otro color, sin subtítulos, el recorte más arriba. Cuando te gusten, "arma 30 anuncios".
+Después dile "arma 3 de prueba". Míralos y pide cambios: subtítulos más grandes, en mayúsculas, de otro color, sin subtítulos, el recorte más arriba. Cuando te gusten, "arma 30 anuncios": no repite los de prueba.
 
 Los videos quedan en `30_ANUNCIOS`, en 9:16 (Reels y Stories) y 4:5 (feed), con nombres que se leen solos: `20261007_PRECIOCONGELADO_LEGO_G06-C03-C07-CTA1_9x16.mp4`.
 
@@ -68,6 +69,10 @@ Un consejo de la cuenta de Imperio: las variantes del mismo gancho van en el mis
 **Los subtítulos tienen una palabra mal escrita.** Pídele a Claude que la corrija en el guion y que vuelva a armar. Los subtítulos usan las palabras de tu guion con los tiempos de lo que dijiste.
 
 **Se me olvidó una pieza.** Graba solo esa, déjala en `10_GRABACIONES` y pídele que corte de nuevo.
+
+**Grabé con Video HDR.** No pasa nada: el kit lo pasa a color normal al cortar. Para la próxima, apágalo y te ahorras ese paso.
+
+**Me equivoqué y empecé la frase de nuevo sin hacer la pausa.** El kit se queda con el último intento y te avisa en el reporte para que lo escuches.
 
 ---
 

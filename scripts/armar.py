@@ -8,19 +8,24 @@ Uso:
     --solo 3                   arma solo los 3 primeros (para probar)
     --recorte-y 0.5            al recortar alto: 0 deja la parte de arriba, 1 la de abajo
     --color "#FFD43B"          color de la palabra activa
+    --rehacer                  vuelve a armar aunque ya existan
 
 Lee mi-negocio/combos.json y 20_PIEZAS/piezas.json. Deja los videos en 30_ANUNCIOS/
 con el nombre AAAAMMDD_ANGULO_LEGO_PIEZAS_FORMATO.mp4 y un INDICE.csv para subirlos.
+Si un anuncio ya está armado con las mismas piezas y el mismo estilo, no lo vuelve a hacer
+(así "arma el resto" no repite los de prueba). Si cambias el estilo, se rehacen solos.
 """
 import argparse
 import csv
 import datetime
+import hashlib
+import json
 import shutil
 import tempfile
 from pathlib import Path
 
-from comun import (ANUNCIOS, FUENTE, NEGOCIO, PIEZAS, RAIZ, avisar, cargar_guion, correr,
-                   ffmpeg_bin, leer_json, morir, slug)
+from comun import (ANUNCIOS, ETIQUETA_SDR, FUENTE, NEGOCIO, PIEZAS, RAIZ, avisar, cargar_guion,
+                   correr, ffmpeg_bin, leer_json, morir, slug)
 
 FORMATOS = {"9x16": (1080, 1920), "4x5": (1080, 1350), "1x1": (1080, 1080), "16x9": (1920, 1080)}
 ALTURA_SUB = {"9x16": 0.64, "4x5": 0.76, "1x1": 0.78, "16x9": 0.82}
@@ -44,7 +49,8 @@ def bloques(palabras, max_palabras=4, max_letras=22, corte=0.6):
             largo = len(" ".join(x["w"] for x in actual + [w]))
             pausa = w["s"] - actual[-1]["e"]
             if (len(actual) >= max_palabras or largo > max_letras or pausa > corte
-                    or actual[-1]["w"][-1:] in ".?!,:;"):
+                    or actual[-1]["w"][-1:] in ".?!,:;"
+                    or w.get("pieza") != actual[-1].get("pieza")):  # nunca mezcla dos piezas
                 grupos.append(actual)
                 actual = []
         actual.append(w)
@@ -159,6 +165,7 @@ def main():
     ap.add_argument("--color", default="#FFD43B")
     ap.add_argument("--fecha", default=datetime.date.today().strftime("%Y%m%d"))
     ap.add_argument("--combos", default=str(NEGOCIO / "combos.json"))
+    ap.add_argument("--rehacer", action="store_true")
     a = ap.parse_args()
 
     ff = ffmpeg_bin()
@@ -183,7 +190,9 @@ def main():
 
     W, H = cortes["lienzo"]
     ANUNCIOS.mkdir(parents=True, exist_ok=True)
-    filas = []
+    indice = ANUNCIOS / "INDICE.csv"
+    previas = leer_indice(indice)
+    filas, saltados = [], 0
     tmp_raiz = Path(tempfile.mkdtemp(prefix="fabrica-"))
     try:
         for ci, combo in enumerate(combos, 1):
@@ -194,12 +203,13 @@ def main():
             # lista de piezas y palabras con su tiempo dentro del anuncio
             lista = ["ffconcat version 1.0"]
             palabras, t0 = [], 0.0
-            for pid in combo["piezas"]:
+            for n_pieza, pid in enumerate(combo["piezas"]):
                 d = cortes["piezas"][pid]
                 ruta = (RAIZ / d["archivo"]).resolve()
                 lista.append(f"file '{ruta.as_posix()}'")
                 for w in d["palabras"]:
-                    palabras.append({"w": w["w"], "s": round(t0 + w["s"], 3), "e": round(t0 + w["e"], 3)})
+                    palabras.append({"w": w["w"], "s": round(t0 + w["s"], 3), "e": round(t0 + w["e"], 3),
+                                     "pieza": n_pieza})
                 t0 += d["duracion"]
             total = round(t0, 3)
             gancho = por_id.get(combo["piezas"][0], {})
@@ -212,6 +222,19 @@ def main():
                 lista_piezas.write_text("\n".join(lista) + "\n", encoding="utf-8")
                 nombre = f"{a.fecha}_{angulo}_LEGO_{'-'.join(combo['piezas'])}_{fmt}.mp4"
                 destino = ANUNCIOS / nombre
+                estilo = firma(a, fmt, [cortes["piezas"][pid] for pid in combo["piezas"]])
+                fila = {
+                    "archivo": nombre, "formato": fmt, "duracion_s": f"{total:.1f}",
+                    "gancho": combo["piezas"][0], "cuerpos": " ".join(combo["piezas"][1:-1]),
+                    "cta": combo["piezas"][-1],
+                    "texto": " ".join(por_id[p]["texto"] for p in combo["piezas"] if p in por_id),
+                    "estilo": estilo}
+                vieja = previas.get(clave_de(nombre))
+                vieja_ruta = ANUNCIOS / vieja["archivo"] if vieja else None
+                if (vieja and not a.rehacer and vieja.get("estilo") == estilo and vieja_ruta.exists()):
+                    saltados += 1   # ya está hecho igual (aunque sea de otro día): se conserva
+                    filas.append({**fila, "archivo": vieja["archivo"]})
+                    continue
                 cw, ch, cx, cy = recorte(W, H, tw, th, a.recorte_y)
                 cmd = [ff, "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(lista_piezas)]
                 grafo = f"[0:v]crop={cw}:{ch}:{cx}:{cy},scale={tw}:{th},setsar=1[base]"
@@ -220,10 +243,12 @@ def main():
                     subs = lista_subtitulos(palabras, total, rot, a.subtitulos, carpeta)
                     cmd += ["-f", "concat", "-safe", "0", "-i", str(subs)]
                     y = int(th * ALTURA_SUB[fmt] - rot.H / 2)
-                    grafo += f";[1:v]format=rgba[sub];[base][sub]overlay=0:{y}:eof_action=pass:format=auto[v]"
+                    grafo += (f";[1:v]format=rgba[sub];[base][sub]overlay=0:{y}:eof_action=pass:format=auto,"
+                              f"format=yuv420p,{ETIQUETA_SDR}[v]")
                     salida_v = "[v]"
                 else:
-                    salida_v = "[base]"
+                    grafo += f";[base]format=yuv420p,{ETIQUETA_SDR}[v]"
+                    salida_v = "[v]"
                 grafo += ";[0:a]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]"
                 cmd += ["-filter_complex", grafo, "-map", salida_v, "-map", "[a]",
                         "-t", f"{total:.3f}", "-r", "30", "-c:v", "libx264", "-preset", "fast",
@@ -231,23 +256,55 @@ def main():
                         "-ac", "2", "-movflags", "+faststart", str(destino)]
                 avisar(f"[{ci}/{len(combos)}] {nombre} ({total:.1f} s)")
                 correr(cmd)
-                filas.append({
-                    "archivo": nombre, "formato": fmt, "duracion_s": f"{total:.1f}",
-                    "gancho": combo["piezas"][0], "cuerpos": " ".join(combo["piezas"][1:-1]),
-                    "cta": combo["piezas"][-1],
-                    "texto": " ".join(por_id[p]["texto"] for p in combo["piezas"] if p in por_id)})
+                if vieja and vieja["archivo"] != nombre and vieja_ruta.exists():
+                    vieja_ruta.unlink()   # la versión anterior de este mismo anuncio
+                filas.append(fila)
     finally:
         shutil.rmtree(tmp_raiz, ignore_errors=True)
 
     if filas:
-        indice = ANUNCIOS / "INDICE.csv"
-        nuevo = not indice.exists()
-        with open(indice, "a", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=list(filas[0].keys()))
-            if nuevo:
-                w.writeheader()
-            w.writerows(filas)
-    avisar(f"\nListo: {len(filas)} videos en 30_ANUNCIOS/ (detalle en 30_ANUNCIOS/INDICE.csv).")
+        escribir_indice(indice, previas, filas)
+    hechos = len(filas) - saltados
+    avisar(f"\nListo: {hechos} videos nuevos en 30_ANUNCIOS/"
+           + (f" ({saltados} ya estaban hechos igual y no los repetí)" if saltados else "")
+           + ". Detalle en 30_ANUNCIOS/INDICE.csv.")
+
+
+CAMPOS = ["archivo", "formato", "duracion_s", "gancho", "cuerpos", "cta", "texto", "estilo"]
+
+
+def firma(a, fmt, datos_piezas):
+    """Huella de cómo se armó un video: si cambian las piezas o el estilo, cambia la huella."""
+    base = {"fmt": fmt, "subtitulos": a.subtitulos, "mayusculas": a.mayusculas,
+            "recorte_y": a.recorte_y, "color": a.color.upper(),
+            "piezas": [[d["archivo"], d.get("origen"), d.get("inicio"), d.get("fin"), d.get("texto_guion")]
+                       for d in datos_piezas]}
+    return hashlib.sha1(json.dumps(base, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:10]
+
+
+def clave_de(nombre):
+    """El nombre sin la fecha: identifica el mismo anuncio aunque se haya armado otro día."""
+    return nombre.split("_", 1)[1] if "_" in nombre else nombre
+
+
+def leer_indice(ruta):
+    if not ruta.exists():
+        return {}
+    with open(ruta, newline="", encoding="utf-8") as f:
+        return {clave_de(fila["archivo"]): fila for fila in csv.DictReader(f) if fila.get("archivo")}
+
+
+def escribir_indice(ruta, previas, filas):
+    """Un renglón por anuncio, sin repetidos: los nuevos reemplazan a los viejos."""
+    todas = dict(previas)
+    for fila in filas:
+        todas[clave_de(fila["archivo"])] = fila
+    existentes = {k: v for k, v in todas.items() if (ANUNCIOS / v["archivo"]).exists()}
+    with open(ruta, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=CAMPOS, extrasaction="ignore")
+        w.writeheader()
+        for fila in existentes.values():
+            w.writerow({c: fila.get(c, "") for c in CAMPOS})
 
 
 if __name__ == "__main__":

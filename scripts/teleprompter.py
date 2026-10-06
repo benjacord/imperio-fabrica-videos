@@ -11,14 +11,18 @@ from comun import NEGOCIO, avisar, cargar_guion
 
 REGLAS = """CÓMO GRABAR (léelo una vez antes de partir)
 
-1. Graba todo en UNA sesión, con la misma ropa, la misma luz y el mismo encuadre.
-2. Celular en vertical, a la altura de los ojos. La cara en el tercio de arriba.
-3. Lee cada pieza de corrido y quédate callado 2 segundos antes de la siguiente.
-4. Si te equivocas: para, cuenta 2 segundos en silencio y repite la pieza COMPLETA.
+1. Antes de partir, apaga el video HDR. iPhone: Ajustes > Cámara > Grabar video >
+   Video HDR (apagado). Android: si tu cámara tiene HDR o HDR10+, apágalo.
+2. Graba todo en UNA sesión, con la misma ropa, la misma luz y el mismo encuadre.
+3. Celular en vertical, a la altura de los ojos. La cara en el tercio de arriba.
+4. Lee cada pieza de corrido y quédate callado 2 segundos antes de la siguiente.
+5. Si te equivocas: para, cuenta 2 segundos en silencio y repite la pieza COMPLETA.
    La última toma es la que se usa, no tienes que borrar nada.
-5. No digas en voz alta los códigos (G01, C03, CTA1): son solo para ti.
-6. Cada gancho tiene que sonar como el comienzo de un video. Cada cuerpo, como si
+6. No digas en voz alta los códigos (G01, C03, CTA1): son solo para ti.
+7. Cada gancho tiene que sonar como el comienzo de un video. Cada cuerpo, como si
    viniera después de cualquier gancho. Mira a la cámara, no al texto, al empezar.
+8. Para pasar el video al computador usa AirDrop, el cable o Google Drive.
+   Por WhatsApp no: lo comprime y se ve peor.
 """
 
 
@@ -33,7 +37,7 @@ def main():
             actual = p["tipo"]
             lineas += ["", f"---  {titulos[actual]}  ---", ""]
         lineas += [f"[{p['id']}]", p["texto"].strip(), "", "[PAUSA 2 SEGUNDOS]", ""]
-    lineas += ["", "FIN. Gracias. Arrastra el video (o los videos) a la carpeta 10_GRABACIONES."]
+    lineas += ["", "FIN. Pásale el video (o los videos) a Claude para que siga."]
     destino = NEGOCIO / "teleprompter.txt"
     destino.write_text("\n".join(lineas) + "\n", encoding="utf-8")
     total = sum(len(p["texto"].split()) for p in piezas)

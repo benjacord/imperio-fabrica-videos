@@ -6,7 +6,7 @@ Uso:
     python3 scripts/doctor.py --arreglar --modelo small   además descarga el modelo de transcripción
 
 Corre con el Python del sistema: no necesita nada instalado de antemano.
-Todo lo que instala queda DENTRO de la carpeta del kit (.venv), no toca tu computador.
+Todo lo que instala queda DENTRO de la carpeta del kit (.venv y .modelos), no toca tu computador.
 """
 import argparse
 import os
@@ -18,10 +18,11 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 VENV = RAIZ / ".venv"
+MODELOS = RAIZ / ".modelos"
 ES_WINDOWS = platform.system() == "Windows"
 PY_VENV = VENV / ("Scripts/python.exe" if ES_WINDOWS else "bin/python")
 
-OK, MAL = "[OK]", "[FALTA]"
+OK, MAL, OJO = "[OK]", "[FALTA]", "[AVISO]"
 
 
 def linea(estado, texto):
@@ -56,7 +57,7 @@ def revisar_venv(arreglar):
     return bueno
 
 
-PAQUETES = {"faster_whisper": "transcripción", "imageio_ffmpeg": "ffmpeg de respaldo",
+PAQUETES = {"faster_whisper": "transcripción", "imageio_ffmpeg": "ffmpeg para cortar y armar",
             "PIL": "subtítulos", "av": "lectura de video"}
 
 
@@ -84,20 +85,29 @@ def revisar_paquetes(arreglar):
 
 
 def revisar_ffmpeg():
-    ff = shutil.which("ffmpeg")
-    origen = "del sistema"
-    if not ff and PY_VENV.exists():
-        bueno, salida = correr([PY_VENV, "-c", "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"])
-        if bueno:
-            ff = salida.strip().splitlines()[-1]
-            origen = "incluido en el kit"
-    if not ff:
-        linea(MAL, "ffmpeg (se instala con --arreglar, viene dentro de imageio-ffmpeg)")
-        return False
-    bueno, salida = correr([ff, "-hide_banner", "-encoders"])
-    tiene_x264 = "libx264" in salida
-    linea(OK if tiene_x264 else MAL, f"ffmpeg {origen} con H.264 ({ff})")
-    return tiene_x264
+    """El mismo orden que usan los scripts: primero el ffmpeg del kit, después el del sistema.
+    Sirve el primero que pueda exportar H.264."""
+    candidatos = []
+    if PY_VENV.exists():
+        bueno, salida = correr([PY_VENV, "-c", "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"],
+                               silencioso=True)
+        if bueno and salida.strip():
+            candidatos.append((salida.strip().splitlines()[-1], "incluido en el kit"))
+    if shutil.which("ffmpeg"):
+        candidatos.append((shutil.which("ffmpeg"), "del sistema"))
+    for ff, origen in candidatos:
+        _, salida = correr([ff, "-hide_banner", "-encoders"], silencioso=True)
+        if "libx264" not in salida:
+            continue
+        linea(OK, f"ffmpeg {origen} con H.264 ({ff})")
+        _, filtros = correr([ff, "-hide_banner", "-filters"], silencioso=True)
+        if " zscale " in filtros:
+            linea(OK, "Conversión de videos HDR del celular a color normal")
+        else:
+            linea(OJO, "Este ffmpeg no convierte videos HDR: graba con Video HDR apagado")
+        return True
+    linea(MAL, "ffmpeg con H.264 (se instala con --arreglar, viene dentro de imageio-ffmpeg)")
+    return False
 
 
 def revisar_fuente():
@@ -116,7 +126,8 @@ def revisar_carpetas():
 def descargar_modelo(nombre):
     print(f"Descargando el modelo de transcripción '{nombre}' (una sola vez)...", flush=True)
     codigo = ("from faster_whisper import WhisperModel;"
-              f"WhisperModel('{nombre}', device='cpu', compute_type='int8');print('listo')")
+              f"WhisperModel('{nombre}', device='cpu', compute_type='int8', download_root={str(MODELOS)!r});"
+              "print('listo')")
     bueno, _ = correr([PY_VENV, "-c", codigo], mostrar=False)
     linea(OK if bueno else MAL, f"Modelo de transcripción '{nombre}'")
     return bueno

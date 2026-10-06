@@ -10,3 +10,4 @@ __pycache__/
 !30_ANUNCIOS/LEEME.md
 mi-negocio/*
 !mi-negocio/LEEME.md
+.modelos/

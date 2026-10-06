@@ -14,7 +14,7 @@ import time
 import warnings
 from pathlib import Path
 
-from comun import (EXT_VIDEO, GRABACIONES, TRANSCRIPCIONES, avisar, escribir_json, morir)
+from comun import (EXT_VIDEO, GRABACIONES, MODELOS, TRANSCRIPCIONES, avisar, escribir_json, morir)
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -51,7 +51,7 @@ def main():
 
     from faster_whisper import WhisperModel
     avisar(f"Cargando el modelo '{a.modelo}'...")
-    modelo = WhisperModel(a.modelo, device="cpu", compute_type="int8")
+    modelo = WhisperModel(a.modelo, device="cpu", compute_type="int8", download_root=str(MODELOS))
     TRANSCRIPCIONES.mkdir(parents=True, exist_ok=True)
 
     for f in archivos:
