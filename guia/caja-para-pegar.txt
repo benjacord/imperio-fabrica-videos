@@ -1,0 +1,28 @@
+Vas a instalar la "Fábrica de Videos" de Imperio Agéntico en este computador. NO soy
+técnico: haz todo tú, nunca me pidas correr un comando ni editar un archivo a mano, y
+explícame cada paso en español simple. Mantén una lista de tareas visible y ve marcando
+lo que terminas.
+
+1) DESCARGA EL KIT (en mi carpeta Documentos)
+   git clone https://github.com/benjacord/imperio-fabrica-videos.git
+   Si no hay git, baja este ZIP y descomprímelo ahí:
+   https://github.com/benjacord/imperio-fabrica-videos/archive/main.zip
+   Trabaja siempre dentro de esa carpeta y lee su CLAUDE.md antes de seguir.
+
+2) PREPARA MI COMPUTADOR (gratis, solo lo que falte)
+   python3 scripts/doctor.py --arreglar --modelo small
+   Si no tengo Python, instálalo tú. Repite hasta que diga LISTO.
+
+3) CONÓCEME (UNA pregunta a la vez)
+   Mi negocio, qué vendo y a cuánto, a quién, qué problema resuelvo, mis pruebas
+   reales y cómo hablo. Guárdalo en mi-negocio/perfil.md.
+
+4) ESCRIBE MI GUION LEGO
+   10 ganchos, 10 cuerpos y 3 llamados a la acción que encajen entre sí. Muéstramelo
+   en una tabla, ajústalo conmigo y déjame el teleprompter listo.
+
+5) CUANDO TE PASE MI GRABACIÓN
+   Córtala (la última toma manda), arma 3 anuncios de prueba, muéstramelos y con mi OK
+   arma el resto en 9:16 y 4:5.
+
+Ten paciencia, asume que nunca he usado una terminal y usa solo este kit.

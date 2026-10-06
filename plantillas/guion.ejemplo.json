@@ -1,0 +1,122 @@
+{
+  "negocio": "Imperio Agéntico (ejemplo real de Benja)",
+  "nota": "Los 10 ganchos salen de anuncios reales de la cuenta de Imperio, con su costo por compra entre julio y agosto de 2026. Los cuerpos están escritos para encajar después de CUALQUIER gancho. Las cifras van en números: así salen bien en los subtítulos.",
+  "ganchos": [
+    {
+      "id": "G01",
+      "angulo": "aviso de precio",
+      "texto": "Te voy a avisar algo y después no me digas que no te dije.",
+      "fuente": "Está a 59 hasta que seamos los más grandes: $51 por compra"
+    },
+    {
+      "id": "G02",
+      "angulo": "quien soy yo",
+      "texto": "Quién soy yo para cobrar por esto? Eso pensaba Tomás, hasta que le pagaron $1.000 al mes.",
+      "fuente": "Quién soy yo para cobrar por esto: $60 por compra"
+    },
+    {
+      "id": "G03",
+      "angulo": "software en 6 horas",
+      "texto": "Cotizó $5.000 por un software de 3 semanas y lo construyó en 6 horas.",
+      "fuente": "Software de 3 semanas hecho en 6 horas: $63 por compra"
+    },
+    {
+      "id": "G04",
+      "angulo": "agente en 14 minutos",
+      "texto": "Montamos un agente de WhatsApp en 14 minutos. Lo cronometramos.",
+      "fuente": "Un agente de WhatsApp en 14 minutos: $64 por compra"
+    },
+    {
+      "id": "G05",
+      "angulo": "la foto broma",
+      "texto": "Hace dos meses subí esta foto hecha con IA como broma. Y se cumplió.",
+      "fuente": "Subí esta foto como broma y se cumplió: $65 por compra"
+    },
+    {
+      "id": "G06",
+      "angulo": "precio congelado",
+      "texto": "Los que entraron a 37 hace 2 años siguen pagando 37.",
+      "fuente": "Los que entraron a 37 siguen pagando 37: $66 por compra"
+    },
+    {
+      "id": "G07",
+      "angulo": "le ganamos a los gringos",
+      "texto": "Le ganamos a los gringos. Oficialmente.",
+      "fuente": "Le ganamos a los gringos: $80 por compra"
+    },
+    {
+      "id": "G08",
+      "angulo": "vendio en 3 dias",
+      "texto": "Vio una clase de 3 horas y a los 3 días vendió su primera página.",
+      "fuente": "Una clase de 3h y vendió a los 3 días: $96 por compra"
+    },
+    {
+      "id": "G09",
+      "angulo": "curso sin resultado",
+      "texto": "Compraste un curso y no pasó nada, cierto?",
+      "fuente": "Compraste un curso y no pasó nada: $102 por compra"
+    },
+    {
+      "id": "G10",
+      "angulo": "no existe en otro lado",
+      "texto": "Esto no existe en ninguna otra comunidad del mundo.",
+      "fuente": "El motor agéntico no existe en otro lado: $77 por compra"
+    }
+  ],
+  "cuerpos": [
+    {
+      "id": "C01",
+      "rol": "problema",
+      "texto": "El problema no es que no sepas de inteligencia artificial. Es que aprendes solo, por pedazos, y nunca terminas nada."
+    },
+    {
+      "id": "C02",
+      "rol": "problema",
+      "texto": "Ver tutoriales no te hace construir. Lo que te falta es alguien que te corrija cuando te trabas."
+    },
+    {
+      "id": "C03",
+      "rol": "mecanismo",
+      "texto": "En Imperio Agéntico partes de agentes que ya funcionan, los adaptas a tu negocio, y si te trabas lo revisamos en vivo."
+    },
+    {
+      "id": "C04",
+      "rol": "mecanismo",
+      "texto": "Tienes 5 sesiones en vivo a la semana, una ruta paso a paso y más de 35 cursos en español."
+    },
+    {
+      "id": "C05",
+      "rol": "prueba",
+      "texto": "Somos más de 3.800 personas construyendo lo mismo, y fuimos la comunidad número 1 en tecnología de los Skool Games."
+    },
+    {
+      "id": "C06",
+      "rol": "prueba",
+      "texto": "Vilma cobró unos $1.300 digitalizando inspecciones industriales con un sistema de 4 pasos."
+    },
+    {
+      "id": "C07",
+      "rol": "oferta",
+      "texto": "Cuesta $59 al mes, y el precio con que entras es tu precio mientras sigas adentro."
+    },
+    {
+      "id": "C08",
+      "rol": "oferta",
+      "texto": "No es un curso más. Es la comunidad, los cursos y los vivos, para que termines con algo funcionando."
+    }
+  ],
+  "ctas": [
+    {
+      "id": "CTA1",
+      "texto": "Toca el botón de abajo y entra hoy."
+    },
+    {
+      "id": "CTA2",
+      "texto": "Entra al link, mira todo lo que hay adentro y decide tú."
+    },
+    {
+      "id": "CTA3",
+      "texto": "Te espero adentro. El botón está abajo."
+    }
+  ]
+}
