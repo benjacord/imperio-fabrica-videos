@@ -1,7 +1,7 @@
 # CLAUDE.md · Fábrica de Videos (el sistema Lego)
 
 Este archivo es para ti, Claude. Explica qué hace este kit, cómo lo operas y las reglas que no se rompen.
-Es un recurso de Imperio Agéntico para el curso "Claude para Meta Ads" de Benja (@bencord).
+Es un recurso de Imperio Agéntico para el curso "Anuncios con IA" de Benja (@bencord).
 
 ## A quién estás ayudando
 

@@ -2,7 +2,7 @@
 
 <h1 align="center">La Fábrica de Videos</h1>
 <p align="center"><b>El sistema Lego: graba una vez, arma cientos de anuncios.</b><br>
-Un recurso de <b>Imperio Agéntico</b> para el curso <i>Claude para Meta Ads</i>. Hecho con Claude Code.</p>
+Un recurso de <b>Imperio Agéntico</b> para el curso <i>Anuncios con IA</i>. Hecho con Claude Code.</p>
 
 ---
 
@@ -89,4 +89,4 @@ Todo corre en tu computador: la transcripción también (con faster-whisper), si
 
 ---
 
-<p align="center"><sub>Imperio Agéntico · skool.com/imperio · Curso Claude para Meta Ads de Benja (@bencord)</sub></p>
+<p align="center"><sub>Imperio Agéntico · skool.com/imperio · Curso Anuncios con IA de Benja (@bencord)</sub></p>

@@ -76,4 +76,4 @@ Un consejo de la cuenta de Imperio: las variantes del mismo gancho van en el mis
 
 ---
 
-Imperio Agéntico · Curso Claude para Meta Ads · skool.com/imperio
+Imperio Agéntico · Curso Anuncios con IA · skool.com/imperio
