@@ -63,7 +63,7 @@ Escribe `mi-negocio/guion.json` con el formato de `plantillas/guion.ejemplo.json
 ```json
 {
   "negocio": "Nombre",
-  "ganchos": [{"id": "G01", "angulo": "precio congelado", "texto": "..."}],
+  "ganchos": [{"id": "G01", "angulo": "precio congelado", "titulo": "TODO ESTO POR $59 AL MES", "texto": "..."}],
   "cuerpos": [{"id": "C01", "rol": "problema", "texto": "..."}],
   "ctas": [{"id": "CTA1", "texto": "..."}]
 }
@@ -74,7 +74,7 @@ Para partir: **10 ganchos, 10 cuerpos y 3 CTA**. Muéstraselo en una tabla legib
 **Reglas del guion (salen de la cuenta real de Imperio, que invirtió más de $200.000 en Meta):**
 
 - **Cada pieza se tiene que poder pegar con cualquier otra.** Un cuerpo no puede decir "como te dije", "eso que viste" ni depender de un gancho en particular. Si lo lees después de cualquier gancho, tiene que sonar natural.
-- **Gancho:** 1 o 2 frases, menos de 4 segundos (unas 10 palabras como máximo). Ojo con las cifras: "$16.990" se lee en 5 palabras. Abre una pregunta en la cabeza del que mira. Las familias que mejor le vendieron a Imperio: precio y urgencia con dato, testimonio con cifra, demostración, historia personal y autoridad (un premio, un ranking). Cada gancho lleva un "angulo" corto, que se usa para nombrar el archivo.
+- **Gancho:** 1 o 2 frases, menos de 4 segundos (unas 10 palabras como máximo). Ojo con las cifras: "$16.990" se lee en 5 palabras. Abre una pregunta en la cabeza del que mira. Las familias que mejor le vendieron a Imperio: precio y urgencia con dato, testimonio con cifra, demostración, historia personal y autoridad (un premio, un ranking). Cada gancho lleva un "angulo" corto, que se usa para nombrar el archivo, y un **"titulo"**: el título fijo que queda arriba durante todo el video (en mayúsculas, menos de 35 caracteres, la promesa del gancho en pocas palabras: "LO QUE TE LLEVAS POR $59", "NO SABES POR DÓNDE PARTIR CON IA?"). Si un gancho no trae título, el video sale sin él.
 - **Evita la confrontación y el miedo** ("te van a pasar por encima", "los flojos van a ganar"): en la cuenta de Imperio fue el 8% del gasto a más del triple del costo por compra normal.
 - **Cuerpo:** una sola idea, 5 a 9 segundos. Cada uno lleva un "rol": `problema`, `mecanismo` (cómo funciona), `prueba` (resultado real) u `oferta` (qué incluye y cuánto cuesta). El armador respeta ese orden.
 - **CTA:** una sola acción, menos de 4 segundos ("Toca el botón de abajo y agenda tu hora").
@@ -104,23 +104,28 @@ Explícale cómo grabar (está también al inicio de `teleprompter.txt`):
    - "Volviste a empezar sin pausa": el corte ya usó el último intento. Solo avísale.
    - "Ganchos de más de 4 segundos": funcionan, pero propónle acortarlos para la próxima.
    - "Tu grabación venía en HDR": ya se convirtió. Recuérdale apagar Video HDR la próxima vez.
+   - "Saqué X s de silencio adentro": se quedó pensando a mitad de pieza y el corte sacó el hueco (todo silencio de más de 0,9 s dentro de una pieza; se ajusta con `--hueco`). Normalmente no hay que hacer nada.
 
 ### 5. Armar
 
 1. `scripts/combinar.py --cantidad 30` decide las combinaciones (`mi-negocio/combos.json`): anuncios de 20 a 30 segundos y ninguno solo con el problema (siempre lleva un cuerpo de mecanismo u oferta). Si no alcanza la cantidad, usa `--cuerpos 2-3`.
-2. `scripts/armar.py --solo 3` arma 3 de prueba. Muéstraselos (abre la carpeta `30_ANUNCIOS`) y pregúntale qué ajustar: subtítulos en mayúsculas (`--mayusculas`), solo la frase sin pintar palabra por palabra (`--subtitulos frase`), sin subtítulos (`--subtitulos no`), otro color (`--color "#00E5FF"`), recorte más arriba o más abajo (`--recorte-y 0.3`).
-3. Con su OK, `scripts/armar.py` arma el resto. Por defecto saca 9:16 (Reels y Stories) y 4:5 (feed). No repite los que ya están hechos con el mismo estilo; si cambiaste el estilo (por ejemplo `--mayusculas`), usa el mismo en este paso y los de prueba se rehacen solos. `--rehacer` fuerza todo de nuevo.
+2. **Antes de armar, la música.** Los anuncios salen con música de fondo bajita si hay una canción en `mi-negocio/musica/` (mp3, m4a o wav). Pídele una que tenga derecho a usar en anuncios (de su biblioteca con licencia, por ejemplo Epidemic Sound o la biblioteca de audio de YouTube) y déjala ahí. Si no tiene, se arma sin música y se puede agregar después. Para otra canción: `--musica <archivo>`; más alta o más baja: `--volumen-musica 0.12` (por defecto 0.08); sin música: `--sin-musica`.
+3. `scripts/armar.py --solo 3` arma 3 de prueba. Muéstraselos (abre la carpeta `30_ANUNCIOS`) y pregúntale qué ajustar: subtítulos en mayúsculas (`--mayusculas`), solo la frase sin pintar palabra por palabra (`--subtitulos frase`), sin subtítulos (`--subtitulos no`), otro color (`--color "#00E5FF"`), recorte más arriba o más abajo (`--recorte-y 0.3`).
+4. Con su OK, `scripts/armar.py` arma el resto. Por defecto saca 9:16 (Reels y Stories) y 4:5 (feed). No repite los que ya están hechos con el mismo estilo; si cambiaste el estilo (por ejemplo `--mayusculas`), usa el mismo en este paso y los de prueba se rehacen solos. `--rehacer` fuerza todo de nuevo.
+
+Cada anuncio sale con el título fijo de su gancho arriba, los subtítulos quemados y la música bajita, que entra y sale con un fundido. Entre pieza y pieza queda una pausa corta (`--union`, 0,17 s por defecto) y cada borde lleva un fundido de milisegundos para que no se oiga un clic. Si la persona siente las pausas largas o cortas, se ajusta con `--union`.
 
 Los nombres siguen la regla `AAAAMMDD_ANGULO_LEGO_PIEZAS_FORMATO.mp4`. Explícale por qué: si un anuncio se llama `IMG_1873.MOV`, en un mes nadie sabe qué era. Con el nombre se lee el ángulo y las piezas sin abrirlo.
 
 ### 6. Textos para Meta
 
-Escribe `mi-negocio/textos-meta.md`: por cada ángulo, un texto principal (2 a 5 líneas, con la oferta real y el precio si corresponde) y un titular de menos de 40 caracteres. Con la voz de la persona.
+Escribe `mi-negocio/textos-meta.md`: por cada ángulo, un texto principal (2 a 5 líneas, con la oferta real y el precio si corresponde) y un titular de menos de 40 caracteres. Con la voz de la persona. **Sin descripción**: en un anuncio de video la descripción termina dentro del botón y Meta lo rechaza al publicarlo (ver "Subir").
 
 ### 7. Subir
 
 - **A mano (lo más seguro):** en el Administrador de anuncios, crea los anuncios dentro de la campaña de prueba y arrastra los videos de `30_ANUNCIOS`. Pon el mismo gancho en el mismo conjunto para no fragmentar el gasto.
 - **Con el conector de Meta (opcional):** si la persona tiene conectado "Meta Ads" en Claude, puedes intentar subirlos tú. Reglas: todo se crea **EN PAUSA**, nunca actives nada sin su OK explícito, y si la subida de video falla, vuelve al método a mano sin insistir.
+- **Ojo con el error #1815589** ("Creative Call To Action's Link Title and Link Description Are Deprecated"). Meta rechaza un anuncio de video cuando el botón lleva título o descripción adentro. Pasa al publicar, no al crear, y no siempre (en la cuenta de Imperio, de 5 anuncios iguales cayeron 2). Por eso: en video, el titular va como titular del video y el botón solo lleva el link; nunca pongas descripción. Si igual aparece, se rehace el creativo sin esos campos.
 
 ## Si algo falla
 

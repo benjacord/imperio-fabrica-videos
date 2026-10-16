@@ -1,64 +1,74 @@
 {
   "negocio": "Imperio Agéntico (ejemplo real de Benja)",
-  "nota": "Los 10 ganchos salen de anuncios reales de la cuenta de Imperio, con su costo por compra entre julio y agosto de 2026. Los cuerpos están escritos para encajar después de CUALQUIER gancho. Las cifras van en números: así salen bien en los subtítulos.",
+  "nota": "Los 10 ganchos salen de anuncios reales de la cuenta de Imperio, con su costo por compra entre julio y agosto de 2026. Los cuerpos están escritos para encajar después de CUALQUIER gancho. Las cifras van en números: así salen bien en los subtítulos. Cada gancho lleva 'titulo': el título fijo que queda arriba todo el video (mayúsculas, menos de 35 caracteres).",
   "ganchos": [
     {
       "id": "G01",
       "angulo": "aviso de precio",
+      "titulo": "TE AVISO ALGO SOBRE EL PRECIO",
       "texto": "Te voy a avisar algo y después no me digas que no te dije.",
       "fuente": "Está a 59 hasta que seamos los más grandes: $51 por compra"
     },
     {
       "id": "G02",
       "angulo": "quien soy yo",
+      "titulo": "QUIÉN SOY YO PARA COBRAR?",
       "texto": "Quién soy yo para cobrar por esto? Eso pensaba Tomás, hasta que le pagaron $1.000 al mes.",
       "fuente": "Quién soy yo para cobrar por esto: $60 por compra"
     },
     {
       "id": "G03",
       "angulo": "software en 6 horas",
+      "titulo": "UN SOFTWARE EN 6 HORAS",
       "texto": "Cotizó $5.000 por un software de 3 semanas y lo construyó en 6 horas.",
       "fuente": "Software de 3 semanas hecho en 6 horas: $63 por compra"
     },
     {
       "id": "G04",
       "angulo": "agente en 14 minutos",
+      "titulo": "UN AGENTE EN 14 MINUTOS",
       "texto": "Montamos un agente de WhatsApp en 14 minutos. Lo cronometramos.",
       "fuente": "Un agente de WhatsApp en 14 minutos: $64 por compra"
     },
     {
       "id": "G05",
       "angulo": "la foto broma",
+      "titulo": "LA FOTO QUE SE CUMPLIÓ",
       "texto": "Hace dos meses subí esta foto hecha con IA como broma. Y se cumplió.",
       "fuente": "Subí esta foto como broma y se cumplió: $65 por compra"
     },
     {
       "id": "G06",
       "angulo": "precio congelado",
+      "titulo": "SIGUEN PAGANDO $37",
       "texto": "Los que entraron a 37 hace 2 años siguen pagando 37.",
       "fuente": "Los que entraron a 37 siguen pagando 37: $66 por compra"
     },
     {
       "id": "G07",
       "angulo": "le ganamos a los gringos",
+      "titulo": "LE GANAMOS A LOS GRINGOS",
       "texto": "Le ganamos a los gringos. Oficialmente.",
       "fuente": "Le ganamos a los gringos: $80 por compra"
     },
     {
       "id": "G08",
       "angulo": "vendio en 3 dias",
+      "titulo": "VENDIÓ A LOS 3 DÍAS",
       "texto": "Vio una clase de 3 horas y a los 3 días vendió su primera página.",
       "fuente": "Una clase de 3h y vendió a los 3 días: $96 por compra"
     },
     {
       "id": "G09",
       "angulo": "curso sin resultado",
+      "titulo": "COMPRASTE UN CURSO Y NADA?",
       "texto": "Compraste un curso y no pasó nada, cierto?",
       "fuente": "Compraste un curso y no pasó nada: $102 por compra"
     },
     {
       "id": "G10",
       "angulo": "no existe en otro lado",
+      "titulo": "NO EXISTE EN OTRO LADO",
       "texto": "Esto no existe en ninguna otra comunidad del mundo.",
       "fuente": "El motor agéntico no existe en otro lado: $77 por compra"
     }

@@ -70,7 +70,7 @@ Abre Claude Code en la carpeta `imperio-fabrica-videos` y pide lo que quieras en
 | "escríbeme un guion Lego nuevo" | 10 ganchos, 10 cuerpos y 3 CTA con tu perfil, listos para aprobar |
 | "prepárame el teleprompter" | El guion en orden de lectura, con las pausas marcadas |
 | "corta mi grabación" | Encuentra cada pieza, usa la última toma y te dice qué faltó |
-| "arma 30 anuncios" | Las combinaciones en `30_ANUNCIOS`, en 9:16 y 4:5, con subtítulos |
+| "arma 30 anuncios" | Las combinaciones en `30_ANUNCIOS`, en 9:16 y 4:5, con título fijo arriba, subtítulos y música bajita |
 | "escribe los textos para Meta" | Texto principal y titular por cada ángulo |
 
 ## Qué hay adentro

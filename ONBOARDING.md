@@ -46,13 +46,15 @@ Puedes grabar todo en un solo video largo o en varios clips. Pásalos al computa
 
 Dile "corta mi grabación". Claude transcribe, encuentra cada pieza y te cuenta qué encontró y qué faltó (está en `20_PIEZAS/REPORTE.md`). Si faltó algo, puedes grabar solo esa pieza.
 
-Después dile "arma 3 de prueba". Míralos y pide cambios: subtítulos más grandes, en mayúsculas, de otro color, sin subtítulos, el recorte más arriba. Cuando te gusten, "arma 30 anuncios": no repite los de prueba.
+Antes de armar, si quieres música de fondo, deja una canción con licencia para anuncios en `mi-negocio/musica/` (o pásasela a Claude y él la deja ahí). Cada anuncio sale con el título fijo de su gancho arriba, los subtítulos y la música bajita.
+
+Después dile "arma 3 de prueba". Míralos y pide cambios: subtítulos más grandes, en mayúsculas, de otro color, sin subtítulos, el recorte más arriba, la música más alta o más baja, las pausas entre piezas más cortas. Cuando te gusten, "arma 30 anuncios": no repite los de prueba.
 
 Los videos quedan en `30_ANUNCIOS`, en 9:16 (Reels y Stories) y 4:5 (feed), con nombres que se leen solos: `20261007_PRECIOCONGELADO_LEGO_G06-C03-C07-CTA1_9x16.mp4`.
 
 ## 6. Subirlos a Meta
 
-Lo más seguro es subirlos a mano en el Administrador de anuncios, dentro de tu campaña de prueba. Si tienes conectado el conector de **Meta Ads** en Claude, puedes pedirle que los suba él: todo queda **en pausa** hasta que tú lo actives.
+Lo más seguro es subirlos a mano en el Administrador de anuncios, dentro de tu campaña de prueba. En los videos no pongas descripción: Meta a veces rechaza el anuncio al publicarlo si el botón lleva texto (error #1815589). Si tienes conectado el conector de **Meta Ads** en Claude, puedes pedirle que los suba él: todo queda **en pausa** hasta que tú lo actives.
 
 Un consejo de la cuenta de Imperio: las variantes del mismo gancho van en el mismo conjunto de anuncios. Si cada una va suelta, el gasto se reparte en pedacitos y ninguna junta evidencia para ganar.
 

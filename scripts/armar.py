@@ -9,6 +9,11 @@ Uso:
     --recorte-y 0.5            al recortar alto: 0 deja la parte de arriba, 1 la de abajo
     --color "#FFD43B"          color de la palabra activa
     --rehacer                  vuelve a armar aunque ya existan
+    --titulo "TEXTO"           título fijo arriba si el gancho no trae "titulo" en guion.json
+    --musica cancion.mp3       música de fondo bajita (si no la das, usa la que esté en
+                               mi-negocio/musica/; --sin-musica la apaga)
+    --volumen-musica 0.08      volumen de la música, relativo a la voz
+    --union 0.17               silencio entre pieza y pieza (-1 = sin recortar)
 
 Lee mi-negocio/combos.json y 20_PIEZAS/piezas.json. Deja los videos en 30_ANUNCIOS/
 con el nombre AAAAMMDD_ANGULO_LEGO_PIEZAS_FORMATO.mp4 y un INDICE.csv para subirlos.
@@ -112,6 +117,66 @@ class Rotulador:
         im.save(ruta)
 
 
+_VOZ = {}
+
+
+def voz_de(ruta):
+    """Tramos con voz de una pieza (el mismo detector que usa cortar.py), guardados en memoria."""
+    if ruta not in _VOZ:
+        import warnings
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        from cortar import regiones_de_voz
+        _VOZ[ruta] = regiones_de_voz(ruta)
+    return _VOZ[ruta]
+
+
+def musica_por_defecto():
+    """La primera canción de mi-negocio/musica/ (mp3, m4a, wav o aac), o "" si no hay."""
+    carpeta = NEGOCIO / "musica"
+    if not carpeta.is_dir():
+        return ""
+    canciones = sorted(p for p in carpeta.iterdir()
+                       if p.suffix.lower() in (".mp3", ".m4a", ".wav", ".aac") and not p.name.startswith("."))
+    return str(canciones[0]) if canciones else ""
+
+
+ALTURA_TITULO = {"9x16": 0.17, "4x5": 0.10, "1x1": 0.10, "16x9": 0.10}
+
+
+def dibujar_titulo(texto, ancho, ruta, mayusculas=True):
+    """Título fijo (Always On): caja blanca redondeada con texto negro, hasta 2 líneas."""
+    from PIL import Image, ImageDraw, ImageFont
+    texto = texto.upper() if mayusculas else texto
+    fs = int(ancho * 0.052)
+    font = ImageFont.truetype(str(FUENTE), fs)
+    maxw = ancho * 0.80
+    lineas, linea = [], ""
+    for p in texto.split():
+        prueba = f"{linea} {p}".strip()
+        if linea and font.getlength(prueba) > maxw:
+            lineas.append(linea)
+            linea = p
+        else:
+            linea = prueba
+    if linea:
+        lineas.append(linea)
+    asc, desc = font.getmetrics()
+    lh = int((asc + desc) * 1.02)
+    pad_x, pad_y = int(fs * 0.55), int(fs * 0.35)
+    caja_w = int(max(font.getlength(l) for l in lineas) + pad_x * 2)
+    caja_h = lh * len(lineas) + pad_y * 2
+    im = Image.new("RGBA", (ancho, caja_h + 4), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    x0 = (ancho - caja_w) // 2
+    d.rounded_rectangle((x0, 0, x0 + caja_w, caja_h), radius=int(fs * 0.35), fill=(255, 255, 255, 245))
+    y = pad_y
+    for l in lineas:
+        d.text(((ancho - font.getlength(l)) / 2, y), l, font=font, fill=(0, 0, 0, 255))
+        y += lh
+    im.save(ruta)
+    return im.size[1]
+
+
 def lista_subtitulos(palabras, total, rot, modo, carpeta):
     """Arma la lista ffconcat de imágenes con su duración exacta."""
     tramos = []
@@ -166,7 +231,21 @@ def main():
     ap.add_argument("--fecha", default=datetime.date.today().strftime("%Y%m%d"))
     ap.add_argument("--combos", default=str(NEGOCIO / "combos.json"))
     ap.add_argument("--rehacer", action="store_true")
+    ap.add_argument("--titulo", default="", help="título fijo arriba (si el combo o el gancho no traen uno)")
+    ap.add_argument("--musica", default="", help="mp3 de fondo, en loop (por defecto, el de mi-negocio/musica/)")
+    ap.add_argument("--sin-musica", action="store_true", help="arma sin música aunque haya una en mi-negocio/musica/")
+    ap.add_argument("--volumen-musica", type=float, default=0.08, help="0 a 1, relativo a la voz")
+    ap.add_argument("--union", type=float, default=0.17,
+                    help="segundos de silencio entre una pieza y la siguiente (-1 = sin recortar)")
     a = ap.parse_args()
+    if a.sin_musica:
+        a.musica = ""
+    elif not a.musica:
+        a.musica = musica_por_defecto()
+        if a.musica:
+            avisar(f"Música de fondo: {Path(a.musica).name} (de mi-negocio/musica/, volumen {a.volumen_musica})")
+    if a.musica and not Path(a.musica).exists():
+        morir(f"No encuentro la música: {a.musica}")
 
     ff = ffmpeg_bin()
     if not ff:
@@ -201,30 +280,38 @@ def main():
                 avisar(f"Salto {combo['id']}: faltan piezas {', '.join(faltan)}")
                 continue
             # lista de piezas y palabras con su tiempo dentro del anuncio
-            lista = ["ffconcat version 1.0"]
-            palabras, t0 = [], 0.0
+            # cada pieza se recorta a su voz real: entre pieza y pieza queda solo la pausa de --union
+            lista, palabras, t0 = [], [], 0.0
             for n_pieza, pid in enumerate(combo["piezas"]):
                 d = cortes["piezas"][pid]
                 ruta = (RAIZ / d["archivo"]).resolve()
-                lista.append(f"file '{ruta.as_posix()}'")
+                a_ini, a_fin = 0.0, d["duracion"]
+                r = voz_de(ruta) if a.union >= 0 else None
+                if r and d["palabras"]:
+                    pw, uw = d["palabras"][0], d["palabras"][-1]
+                    a_ini = max(0.0, r[0][0] - max(0.08, a.union * 0.35))
+                    # el final de frase se dice suave y el detector lo pierde: manda la última palabra
+                    a_fin = min(d["duracion"], max(r[-1][1] + a.union * 0.65, uw["e"] - 0.02))
+                    if n_pieza == len(combo["piezas"]) - 1:
+                        a_fin = d["duracion"]   # el CTA cierra el video: se deja completo
+                lista.append((ruta, round(a_ini, 3), round(a_fin - a_ini, 3)))
                 for w in d["palabras"]:
-                    palabras.append({"w": w["w"], "s": round(t0 + w["s"], 3), "e": round(t0 + w["e"], 3),
-                                     "pieza": n_pieza})
-                t0 += d["duracion"]
+                    palabras.append({"w": w["w"], "s": round(t0 + max(0.0, w["s"] - a_ini), 3),
+                                     "e": round(t0 + min(a_fin, w["e"]) - a_ini, 3), "pieza": n_pieza})
+                t0 += a_fin - a_ini
             total = round(t0, 3)
             gancho = por_id.get(combo["piezas"][0], {})
             angulo = slug(gancho.get("angulo") or gancho.get("texto") or combo["piezas"][0], 20)
+            titulo = (combo.get("titulo") or gancho.get("titulo") or a.titulo or "").strip()
             for fmt in formatos:
                 tw, th = FORMATOS[fmt]
                 carpeta = tmp_raiz / f"{combo['id']}_{fmt}"
                 carpeta.mkdir(parents=True, exist_ok=True)
-                lista_piezas = carpeta / "piezas.ffconcat"
-                lista_piezas.write_text("\n".join(lista) + "\n", encoding="utf-8")
                 nombre = f"{a.fecha}_{angulo}_LEGO_{'-'.join(combo['piezas'])}_{fmt}.mp4"
                 destino = ANUNCIOS / nombre
-                estilo = firma(a, fmt, [cortes["piezas"][pid] for pid in combo["piezas"]])
+                estilo = firma(a, fmt, [cortes["piezas"][pid] for pid in combo["piezas"]], titulo)
                 fila = {
-                    "archivo": nombre, "formato": fmt, "duracion_s": f"{total:.1f}",
+                    "archivo": nombre, "formato": fmt, "duracion_s": f"{total:.1f}", "titulo": titulo,
                     "gancho": combo["piezas"][0], "cuerpos": " ".join(combo["piezas"][1:-1]),
                     "cta": combo["piezas"][-1],
                     "texto": " ".join(por_id[p]["texto"] for p in combo["piezas"] if p in por_id),
@@ -236,20 +323,41 @@ def main():
                     filas.append({**fila, "archivo": vieja["archivo"]})
                     continue
                 cw, ch, cx, cy = recorte(W, H, tw, th, a.recorte_y)
-                cmd = [ff, "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(lista_piezas)]
-                grafo = f"[0:v]crop={cw}:{ch}:{cx}:{cy},scale={tw}:{th},setsar=1[base]"
+                cmd = [ff, "-y", "-v", "error"]
+                for ruta, desde, largo in lista:
+                    cmd += ["-ss", f"{desde:.3f}", "-t", f"{largo:.3f}", "-i", str(ruta)]
+                k = len(lista)
+                grafo = ("".join(f"[{i}:a]afade=t=in:d=0.015,afade=t=out:st={max(0.0, l - 0.03):.3f}:d=0.03[a{i}];"
+                                 for i, (_, _, l) in enumerate(lista))
+                         + "".join(f"[{i}:v][a{i}]" for i in range(k)) + f"concat=n={k}:v=1:a=1[cv][ca];"
+                         f"[cv]crop={cw}:{ch}:{cx}:{cy},scale={tw}:{th},setsar=1[base]")
+                capa, n_in = "[base]", k
                 if a.subtitulos != "no" and palabras:
                     rot = Rotulador(tw, a.mayusculas, a.color)
                     subs = lista_subtitulos(palabras, total, rot, a.subtitulos, carpeta)
                     cmd += ["-f", "concat", "-safe", "0", "-i", str(subs)]
                     y = int(th * ALTURA_SUB[fmt] - rot.H / 2)
-                    grafo += (f";[1:v]format=rgba[sub];[base][sub]overlay=0:{y}:eof_action=pass:format=auto,"
-                              f"format=yuv420p,{ETIQUETA_SDR}[v]")
-                    salida_v = "[v]"
+                    grafo += (f";[{n_in}:v]format=rgba[sub];{capa}[sub]overlay=0:{y}:eof_action=pass:format=auto[consub]")
+                    capa, n_in = "[consub]", n_in + 1
+                if titulo:
+                    png = carpeta / "titulo.png"
+                    alto_t = dibujar_titulo(titulo, tw, png)
+                    cmd += ["-loop", "1", "-i", str(png)]
+                    yt = int(th * ALTURA_TITULO[fmt] - alto_t / 2)
+                    grafo += f";[{n_in}:v]format=rgba[tit];{capa}[tit]overlay=0:{yt}:shortest=1[contit]"
+                    capa, n_in = "[contit]", n_in + 1
+                grafo += f";{capa}format=yuv420p,{ETIQUETA_SDR}[v]"
+                salida_v = "[v]"
+                grafo += ";[ca]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000"
+                if a.musica:
+                    cmd += ["-stream_loop", "-1", "-i", str(Path(a.musica).resolve())]
+                    fade = max(total - 1.2, 0)
+                    grafo += (f"[voz];[{n_in}:a]aresample=48000,volume={a.volumen_musica},"
+                              f"afade=t=in:d=0.5,afade=t=out:st={fade:.2f}:d=1.2[mus];"
+                              f"[voz][mus]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[a]")
+                    n_in += 1
                 else:
-                    grafo += f";[base]format=yuv420p,{ETIQUETA_SDR}[v]"
-                    salida_v = "[v]"
-                grafo += ";[0:a]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]"
+                    grafo += "[a]"
                 cmd += ["-filter_complex", grafo, "-map", salida_v, "-map", "[a]",
                         "-t", f"{total:.3f}", "-r", "30", "-c:v", "libx264", "-preset", "fast",
                         "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
@@ -270,13 +378,14 @@ def main():
            + ". Detalle en 30_ANUNCIOS/INDICE.csv.")
 
 
-CAMPOS = ["archivo", "formato", "duracion_s", "gancho", "cuerpos", "cta", "texto", "estilo"]
+CAMPOS = ["archivo", "formato", "duracion_s", "titulo", "gancho", "cuerpos", "cta", "texto", "estilo"]
 
 
-def firma(a, fmt, datos_piezas):
+def firma(a, fmt, datos_piezas, titulo=""):
     """Huella de cómo se armó un video: si cambian las piezas o el estilo, cambia la huella."""
     base = {"fmt": fmt, "subtitulos": a.subtitulos, "mayusculas": a.mayusculas,
-            "recorte_y": a.recorte_y, "color": a.color.upper(),
+            "recorte_y": a.recorte_y, "color": a.color.upper(), "titulo": titulo,
+            "musica": Path(a.musica).name if a.musica else "", "vol": a.volumen_musica, "union": a.union,
             "piezas": [[d["archivo"], d.get("origen"), d.get("inicio"), d.get("fin"), d.get("texto_guion")]
                        for d in datos_piezas]}
     return hashlib.sha1(json.dumps(base, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:10]

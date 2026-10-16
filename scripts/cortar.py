@@ -340,6 +340,8 @@ def main():
     ap.add_argument("--pausa", type=float, default=0.9)
     ap.add_argument("--margen-inicio", type=float, default=0.12)
     ap.add_argument("--margen-fin", type=float, default=0.30)
+    ap.add_argument("--hueco", type=float, default=0.9,
+                    help="silencio máximo dentro de una pieza (segundos); lo que pase de eso se saca")
     a = ap.parse_args()
 
     _, piezas = cargar_guion(a.guion)
@@ -402,6 +404,16 @@ def main():
             faltan.append({"id": pid, "tipo": p["tipo"], "texto": p["texto"], "mejor_parecido": round(t["sim"], 2)})
             continue
         destino = PIEZAS / f"{pid}.mp4"
+        palabras = alinear(p["texto"], t["palabras"], inicio_voz)
+        # silencios largos DENTRO de la pieza (te quedaste pensando a mitad de frase): se sacan
+        tramos = [[ini, fin]]
+        for w1, w2 in zip(palabras, palabras[1:]):
+            if w2["s"] - w1["e"] > a.hueco:
+                corte_a, corte_b = w1["e"] + 0.12, w2["s"] - 0.10
+                if corte_b - corte_a > 0.2:
+                    tramos[-1][1] = corte_a
+                    tramos.append([corte_b, fin])
+        dur = round(sum(b - c for c, b in tramos), 3)
         # primero a 30 cuadros y al tamaño final (así la conversión de color trabaja menos)
         vf = f"fps=30,scale={W}:{H}:force_original_aspect_ratio=decrease,"
         if trans["hdr"] and puede_hdr:
@@ -409,12 +421,35 @@ def main():
         vf += f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,format=yuv420p,{ETIQUETA_SDR}"
         af = (f"aresample=48000,afade=t=in:st=0:d=0.03,"
               f"afade=t=out:st={max(0.0, dur - 0.06):.3f}:d=0.06")
-        avisar(f"Cortando {pid} ({dur:.1f} s, toma {n_usada} de {n_tomas}, parecido {t['sim']:.2f})")
-        correr([ff, "-y", "-v", "error", "-ss", f"{ini:.3f}", "-i", str(trans["ruta"]), "-t", f"{dur:.3f}",
-                "-vf", vf, "-af", af, "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-                "-c:a", "aac", "-b:a", "192k", "-ac", "2", "-movflags", "+faststart", str(destino)])
-        palabras = alinear(p["texto"], t["palabras"], inicio_voz)
-        rel = [{"w": w["w"], "s": round(max(0.0, w["s"] - ini), 3), "e": round(max(0.0, w["e"] - ini), 3)}
+        quitado = round(fin - ini - dur, 1)
+        avisar(f"Cortando {pid} ({dur:.1f} s, toma {n_usada} de {n_tomas}, parecido {t['sim']:.2f})"
+               + (f", saqué {quitado} s de silencio adentro" if len(tramos) > 1 else ""))
+        base = [ff, "-y", "-v", "error", "-ss", f"{ini:.3f}", "-i", str(trans["ruta"]), "-t", f"{fin - ini:.3f}"]
+        if len(tramos) == 1:
+            filtros = ["-vf", vf, "-af", af]
+        else:
+            g, entradas = [], ""
+            for k, (c, b) in enumerate(tramos):
+                g.append(f"[0:v]trim=start={c - ini:.3f}:end={b - ini:.3f},setpts=PTS-STARTPTS[v{k}]")
+                g.append(f"[0:a]atrim=start={c - ini:.3f}:end={b - ini:.3f},asetpts=PTS-STARTPTS,"
+                         f"afade=t=in:d=0.02,afade=t=out:st={max(0.0, b - c - 0.04):.3f}:d=0.04[a{k}]")
+                entradas += f"[v{k}][a{k}]"
+            g.append(f"{entradas}concat=n={len(tramos)}:v=1:a=1[cv][ca]")
+            g.append(f"[cv]{vf}[v]")
+            g.append(f"[ca]{af}[a]")
+            filtros = ["-filter_complex", ";".join(g), "-map", "[v]", "-map", "[a]"]
+        correr(base + filtros + ["-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+                                 "-c:a", "aac", "-b:a", "192k", "-ac", "2", "-movflags", "+faststart",
+                                 str(destino)])
+
+        def a_relativo(x):
+            acum = 0.0
+            for c, b in tramos:
+                if x <= b:
+                    return max(0.0, acum + max(0.0, x - c))
+                acum += b - c
+            return acum
+        rel = [{"w": w["w"], "s": round(a_relativo(w["s"]), 3), "e": round(a_relativo(w["e"]), 3)}
                for w in palabras]
         salida["piezas"][pid] = {
             "tipo": p["tipo"], "rol": p.get("rol"), "angulo": p.get("angulo"),
